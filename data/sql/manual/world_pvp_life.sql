@@ -61,8 +61,9 @@ INSERT INTO `pvp_life_zone`
  `attackers_min`,`attackers_max`,`defenders_min`,`defenders_max`,`duration_min`,`duration_max`,`weight`,`cooldown_seconds`,`last_start`,`challenge_players`,`bot_chat`)
 VALUES
 -- Duel zones: intentionally level 1-80. Real-player challenge still obeys MaxLevelDifference.
-('StormwindDuel',1,1,0,0,1,80,0, -8834.0,622.0,94.0,0.0, -8795.0,585.0,96.0,0.0, 4,8,4,8,20,40,220,30,0,1,0),
-('OrgrimmarDuel',1,1,1,1,1,80,1, 1502.0,-4415.0,22.0,0.0, 1450.0,-4418.0,25.0,0.0, 4,8,4,8,20,40,220,30,0,1,0),
+-- Both teams use the matching game_tele location as their center; PvPLife adds small placement jitter.
+('StormwindDuel',1,1,0,0,1,80,0, -9122.49,350.862,93.7893,4.19046, -9122.49,350.862,93.7893,4.19046, 4,8,4,8,20,40,220,30,0,1,0), -- allyduelzone
+('OrgrimmarDuel',1,1,1,1,1,80,1, 1282.04,-4395.88,26.3002,3.63561, 1282.04,-4395.88,26.3002,3.63561, 4,8,4,8,20,40,220,30,0,1,0), -- hordeduelzone
 
 -- Normal world-PvP hotspots.
 ('STV_Nesingwary',1,0,1,0,25,50,0, -11670.0,-50.0,5.0,0.0, -11620.0,-70.0,10.0,0.0, 5,10,5,10,12,25,120,600,0,0,0),
