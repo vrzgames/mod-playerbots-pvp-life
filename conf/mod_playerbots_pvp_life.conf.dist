@@ -39,6 +39,15 @@ PvPLife.Bots.QueryLimit = 500
 # Avoid stealing bots that are currently grouped for player/raid/dungeon activity.
 PvPLife.Bots.SkipGrouped = 1
 
+# When enabled, only bots currently allowed by Playerbots' activity throttle are eligible.
+# Keep disabled for PvP Life: otherwise BotActiveAlone can silently reject most or all random bots.
+PvPLife.Bots.RespectPlayerbotActivity = 0
+
+# Start an activity with fewer bots than the randomly requested amount when necessary.
+# Both sides must still contain at least MinimumPerSide eligible bots.
+PvPLife.Bots.AllowPartialTeams = 1
+PvPLife.Bots.MinimumPerSide = 1
+
 # Return participating bots to their original location when an activity finishes.
 PvPLife.Bots.ReturnAfterActivity = 1
 
@@ -72,6 +81,27 @@ PvPLife.World.MaxActiveHotspots = 3
 PvPLife.World.RandomStartChance = 35
 
 ###################################################################################################
+# Per-zone switches
+###################################################################################################
+
+# A zone must be enabled both here and in the pvp_life_zone database table to start automatically.
+# 1 = enabled, 0 = disabled. A GM can still force a disabled zone with .pvplife start <name>.
+PvPLife.Zone.StormwindDuel.Enable = 1
+PvPLife.Zone.OrgrimmarDuel.Enable = 1
+PvPLife.Zone.STV_Nesingwary.Enable = 1
+PvPLife.Zone.STV_Gurubashi.Enable = 1
+PvPLife.Zone.Tanaris_Gadgetzan.Enable = 1
+PvPLife.Zone.DarkPortal_Azeroth.Enable = 1
+PvPLife.Zone.DarkPortal_Outland.Enable = 1
+PvPLife.Zone.Shattrath_Outskirts.Enable = 1
+PvPLife.Zone.K3_StormPeaks.Enable = 1
+PvPLife.Zone.Goldshire_Roaming.Enable = 1
+PvPLife.Zone.Durotar_Roaming.Enable = 1
+PvPLife.Zone.Orgrimmar_Zeppelin.Enable = 0
+PvPLife.Zone.ForTheHorde_Stormwind.Enable = 1
+PvPLife.Zone.ForTheAlliance_Orgrimmar.Enable = 1
+
+###################################################################################################
 # Duel zones
 ###################################################################################################
 
@@ -87,6 +117,13 @@ PvPLife.Duel.SpellId = 7266
 PvPLife.Duel.PairLimit = 12
 PvPLife.Duel.PairDelayMinSeconds = 5
 PvPLife.Duel.PairDelayMaxSeconds = 18
+
+# Keep duel-zone bots close to the configured rally/target midpoint.
+PvPLife.Duel.LeashRadius = 40
+
+# How often idle duel participants are anchored to their assigned position.
+# Active duels and combat movement are never interrupted by this guard.
+PvPLife.Duel.GuardIntervalMs = 1000
 
 # Bots may challenge nearby REAL players.
 PvPLife.Duel.ChallengeRealPlayers = 1
@@ -134,4 +171,4 @@ PvPLife.BotChat.WorldChance = 35
 
 PvPLife.Strategies.Combat = "+pvp,+boost,+dps debuff,-passive,-stay"
 PvPLife.Strategies.NonCombat = "+pvp,+boost,-passive,-stay"
-PvPLife.Strategies.DuelNonCombat = "+duel,+pvp,+boost,-passive,-stay"
+PvPLife.Strategies.DuelNonCombat = "+duel,+pvp,+boost,+stay,-follow,-passive,-grind"
