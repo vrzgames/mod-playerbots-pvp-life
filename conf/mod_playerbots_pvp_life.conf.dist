@@ -1,0 +1,137 @@
+###################################################################################################
+# PvP Life
+###################################################################################################
+
+[worldserver]
+
+# Master switch.
+PvPLife.Enable = 1
+
+# Verbose server log output.
+PvPLife.Debug = 0
+
+# Server-wide system messages when activities start/end.
+# Recommended OFF for a more natural/player-like world.
+PvPLife.Announce = 0
+
+# Delay after worldserver startup before the module becomes active.
+PvPLife.StartupDelaySeconds = 90
+
+# Manager logic interval.
+PvPLife.TickSeconds = 20
+
+###################################################################################################
+# Bot selection / movement
+###################################################################################################
+
+# Read the random-bot account prefix from mod-playerbots when possible.
+PvPLife.Bots.UsePlayerbotConfig = 1
+
+# "auto" = use mod-playerbots prefix. Set an explicit prefix only if needed.
+PvPLife.Bots.AccountPrefix = "auto"
+
+# Optional account-id range. 0/0 disables range filtering.
+PvPLife.Bots.AccountMin = 0
+PvPLife.Bots.AccountMax = 0
+
+PvPLife.Bots.QueryLimit = 500
+
+# Avoid stealing bots that are currently grouped for player/raid/dungeon activity.
+PvPLife.Bots.SkipGrouped = 1
+
+# Return participating bots to their original location when an activity finishes.
+PvPLife.Bots.ReturnAfterActivity = 1
+
+# After the initial rally placement, use MovePoint toward the fight area.
+PvPLife.Movement.UseMovePoint = 1
+
+# Random position offset in yards to prevent stacking.
+PvPLife.Movement.PositionJitter = 10
+
+# Spread bot arrivals over a random delay instead of moving everyone simultaneously.
+PvPLife.Movement.ArrivalStaggerMinSeconds = 2
+PvPLife.Movement.ArrivalStaggerMaxSeconds = 12
+PvPLife.Movement.MoveAfterArrivalMinSeconds = 6
+PvPLife.Movement.MoveAfterArrivalMaxSeconds = 20
+
+# Hard safety cap per faction/side for one activity.
+PvPLife.Bots.MaxPerSide = 30
+
+###################################################################################################
+# Persistent world PvP
+###################################################################################################
+
+# Keep world PvP alive somewhere at practically all times.
+PvPLife.World.AlwaysActive = 1
+
+# Number of simultaneously active normal world-PvP hotspots.
+PvPLife.World.MinActiveHotspots = 1
+PvPLife.World.MaxActiveHotspots = 3
+
+# Chance each manager tick to start an additional normal hotspot if below MaxActiveHotspots.
+PvPLife.World.RandomStartChance = 35
+
+###################################################################################################
+# Duel zones
+###################################################################################################
+
+PvPLife.Duel.Enable = 1
+
+# Keep enabled duel zones populated almost continuously.
+PvPLife.Duel.AlwaysActive = 1
+
+# WotLK duel request spell.
+PvPLife.Duel.SpellId = 7266
+
+# Maximum number of bot-vs-bot duel pairs scheduled per duel-zone activation.
+PvPLife.Duel.PairLimit = 12
+PvPLife.Duel.PairDelayMinSeconds = 5
+PvPLife.Duel.PairDelayMaxSeconds = 18
+
+# Bots may challenge nearby REAL players.
+PvPLife.Duel.ChallengeRealPlayers = 1
+PvPLife.Duel.PlayerChallengeChance = 25
+PvPLife.Duel.PlayerScanRadius = 55
+
+# Critical fairness check. Example: with 5, a level 10 bot can only challenge level 5-15 players.
+PvPLife.Duel.MaxLevelDifference = 5
+
+# Anti-spam: the same player / same bot cannot be repeatedly challenged.
+PvPLife.Duel.PlayerChallengeCooldownSeconds = 900
+PvPLife.Duel.BotChallengeCooldownSeconds = 180
+
+# Time before the same bot can be paired for another bot-vs-bot duel.
+PvPLife.Duel.BotVsBotCooldownSeconds = 45
+
+# Maximum level difference for bot-vs-bot duel pairing.
+PvPLife.Duel.BotVsBotMaxLevelDifference = 5
+
+###################################################################################################
+# For the Horde / For the Alliance
+###################################################################################################
+
+# Faction pressure on enemy capitals / faction territory.
+# Deliberately treated as normal world PvP, not as a scripted server announcement event.
+PvPLife.ForTheHorde.Enable = 1
+PvPLife.ForTheAlliance.Enable = 1
+
+# Chance per manager tick to attempt one faction campaign after its global cooldown.
+PvPLife.FactionCampaign.ChancePerTick = 12
+PvPLife.FactionCampaign.GlobalCooldownSeconds = 3600
+
+###################################################################################################
+# Natural bot chat
+###################################################################################################
+
+# Used mainly for faction-city fights. Lines are stored in pvp_life_chat.
+PvPLife.BotChat.Enable = 1
+PvPLife.BotChat.YellChance = 70
+PvPLife.BotChat.WorldChance = 35
+
+###################################################################################################
+# Playerbot strategies
+###################################################################################################
+
+PvPLife.Strategies.Combat = "+pvp,+boost,+dps debuff,-passive,-stay"
+PvPLife.Strategies.NonCombat = "+pvp,+boost,-passive,-stay"
+PvPLife.Strategies.DuelNonCombat = "+duel,+pvp,+boost,-passive,-stay"
