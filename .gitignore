@@ -1,0 +1,14 @@
+# Local build output
+build/
+cmake-build-*/
+
+# IDE/editor metadata
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# OS-generated files
+.DS_Store
+Thumbs.db
