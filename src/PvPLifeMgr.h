@@ -36,6 +36,7 @@ namespace PvPLife
 
         std::vector<Zone> LoadZones(bool readyOnly = false, int typeFilter = -1);
         bool LoadZoneByName(std::string name, Zone& out);
+        bool IsZoneEnabledByConfig(std::string const& name) const;
         Zone ReadZone(Field* fields);
         std::string ZoneSelectSql(std::string const& suffix = "") const;
 
@@ -65,6 +66,7 @@ namespace PvPLife
         void ProcessDuelQueue();
         void ProcessChatQueue();
         void ProcessRealPlayerChallenges();
+        void MaintainDuelParticipants();
         void MaintainBotDuels();
 
         void ApplyPvpStrategies(Player* player, bool duelMode) const;
@@ -79,6 +81,7 @@ namespace PvPLife
         bool HandleZoneCommand(ChatHandler* handler, std::vector<std::string> const& args);
 
         bool _enable = true;
+        bool _databaseReady = false;
         bool _debug = false;
         bool _announce = false;
         uint32 _startupDelaySeconds = 90;
@@ -92,6 +95,9 @@ namespace PvPLife
         uint32 _botAccountMax = 0;
         uint32 _botQueryLimit = 500;
         bool _skipGroupedBots = true;
+        bool _respectPlayerbotActivity = false;
+        bool _allowPartialTeams = true;
+        uint32 _minimumBotsPerSide = 1;
         bool _returnBots = true;
         bool _useMovePoint = true;
         uint32 _positionJitter = 10;
@@ -112,6 +118,9 @@ namespace PvPLife
         uint32 _duelPairLimit = 12;
         uint32 _duelPairDelayMin = 5;
         uint32 _duelPairDelayMax = 18;
+        uint32 _duelLeashRadius = 40;
+        uint32 _duelGuardIntervalMs = 1000;
+        uint32 _duelGuardTimerMs = 0;
         bool _challengeRealPlayers = true;
         uint32 _realPlayerChallengeChance = 25;
         uint32 _realPlayerScanRadius = 55;
@@ -133,7 +142,7 @@ namespace PvPLife
 
         std::string _pvpCombatStrategies = "+pvp,+boost,+dps debuff,-passive,-stay";
         std::string _pvpNonCombatStrategies = "+pvp,+boost,-passive,-stay";
-        std::string _duelNonCombatStrategies = "+duel,+pvp,+boost,-passive,-stay";
+        std::string _duelNonCombatStrategies = "+duel,+pvp,+boost,+stay,-follow,-passive,-grind";
 
         uint64 _nextEventId = 1;
         std::vector<ActiveEvent> _activeEvents;

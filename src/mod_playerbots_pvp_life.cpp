@@ -16,7 +16,10 @@ using namespace Acore::ChatCommands;
 class PvPLifeWorldScript : public WorldScript
 {
 public:
-    PvPLifeWorldScript() : WorldScript("PvPLifeWorldScript") { }
+    PvPLifeWorldScript()
+        : WorldScript("PvPLifeWorldScript", { WORLDHOOK_ON_AFTER_CONFIG_LOAD, WORLDHOOK_ON_UPDATE })
+    {
+    }
 
     void OnAfterConfigLoad(bool /*reload*/) override
     {
@@ -53,4 +56,5 @@ void AddPvPLifeScripts()
 {
     new PvPLifeWorldScript();
     new PvPLifeCommandScript();
+    LOG_INFO("server.loading", ">> Loaded mod-playerbots-pvp-life");
 }

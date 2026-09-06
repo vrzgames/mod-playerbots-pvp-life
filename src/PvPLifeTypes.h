@@ -86,6 +86,10 @@ namespace PvPLife
         float OriginalY = 0.0f;
         float OriginalZ = 0.0f;
         float OriginalO = 0.0f;
+        float ActivityX = 0.0f;
+        float ActivityY = 0.0f;
+        float ActivityZ = 0.0f;
+        float ActivityO = 0.0f;
     };
 
     struct ActiveEvent
