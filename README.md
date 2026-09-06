@@ -6,7 +6,7 @@ Created by **iCore**.
 
 An AzerothCore + mod-playerbots module focused on making the open world feel active through persistent, configurable bot PvP rather than isolated scripted battles.
 
- It is intentionally split into independent systems so each part can be enabled, tuned, or disabled without affecting the others.
+It is intentionally split into independent systems so each part can be enabled, tuned, or disabled without affecting the others.
 
 ### Included systems
 
@@ -18,14 +18,18 @@ An AzerothCore + mod-playerbots module focused on making the open world feel act
 - **Natural defender chat**: optional bot `/yell` and world-chat style reactions such as `horde in sw` or `ally in org`.
 - **Optional announcements**: server-wide scripted announcements exist for debugging/information but are disabled by default.
 - **Randomisation**: bot counts, duration, arrival timing, movement and position jitter are varied to reduce scripted-looking behaviour.
-- **Activity protection**: bots in combat, battlegrounds, instances, flight, duels, or (by default) groups are rejected; the selector also respects Playerbots' own `AllowActivity(ALL_ACTIVITY)` state.
+- **Activity protection**: bots in combat, battlegrounds, instances, flight, duels, or (by default) groups are rejected.
+- **Small-population fallback**: activities can start with smaller teams instead of silently failing when the full random bot count is unavailable.
+- **Permanent capital duel zones**: available random bots are kept near the configured Stormwind and Orgrimmar duel points, automatically paired, healed and re-paired after duels.
 - **Return handling**: participants can be sent back to their previous location when their activity ends.
 
 ## Requirements
 
-- AzerothCore WotLK using the `mod-playerbots` compatible Playerbot core branch.
-- `mod-playerbots` installed and working.
+- [`mod-playerbots/azerothcore-wotlk`, Playerbot branch](https://github.com/mod-playerbots/azerothcore-wotlk/tree/Playerbot)
+- [`mod-playerbots/mod-playerbots`, master branch](https://github.com/mod-playerbots/mod-playerbots)
 - C++17-capable build environment used by current AzerothCore.
+
+This module is specifically designed for the Playerbot fork of AzerothCore and must be built together with `mod-playerbots`.
 
 ## Installation
 
@@ -57,8 +61,15 @@ PvPLife.World.AlwaysActive = 1
 PvPLife.World.MinActiveHotspots = 1
 PvPLife.World.MaxActiveHotspots = 3
 
+# Individual zone switches (1 = automatic activity enabled, 0 = disabled)
+PvPLife.Zone.STV_Nesingwary.Enable = 1
+PvPLife.Zone.STV_Gurubashi.Enable = 1
+PvPLife.Zone.DarkPortal_Azeroth.Enable = 1
+PvPLife.Zone.Shattrath_Outskirts.Enable = 1
+
 PvPLife.Duel.Enable = 1
 PvPLife.Duel.AlwaysActive = 1
+PvPLife.Duel.GuardIntervalMs = 1000
 PvPLife.Duel.ChallengeRealPlayers = 1
 PvPLife.Duel.MaxLevelDifference = 5
 PvPLife.Duel.BotVsBotMaxLevelDifference = 5
@@ -68,6 +79,10 @@ PvPLife.ForTheHorde.Enable = 1
 PvPLife.ForTheAlliance.Enable = 1
 
 PvPLife.BotChat.Enable = 1
+
+PvPLife.Bots.RespectPlayerbotActivity = 0
+PvPLife.Bots.AllowPartialTeams = 1
+PvPLife.Bots.MinimumPerSide = 1
 ```
 
 ### Level check example
@@ -80,9 +95,18 @@ PvPLife.Duel.MaxLevelDifference = 5
 
 a level 10 bot can challenge only players within level 5-15. It cannot challenge a level 80 player. Bot-vs-bot duel pairing has the same idea through the separate `BotVsBotMaxLevelDifference` setting.
 
+Duel participants are reserved from the random-playerbot teleport cycle for the duration of the
+activity. While waiting, each bot is anchored near its assigned duel position; active duel and combat
+movement is left untouched. `GuardIntervalMs` controls how frequently the waiting-position guard runs.
+
 ## Database-driven zones
 
 `pvp_life_zone` stores the locations and behaviour of each activity.
+
+Every database zone can also be controlled from the config with
+`PvPLife.Zone.<zone name>.Enable`. The database `enabled` field and the config switch must both
+be enabled for automatic activity. A manual `.pvplife start <name>` command can still force-start
+a disabled zone for testing.
 
 Activity types:
 
@@ -161,16 +185,19 @@ The duel system is meant to look like a populated PvP-server duel area, not a du
 
 These are deliberately part of the normal world-PvP framework, with faction-specific attackers and defenders rather than a separate minigame. Server announcements are off by default; optional defender yell/world-chat messages provide the visible clue that something is happening.
 
+## Test priorities
+
+For the first live-server test, verify in this order:
 
 1. module loads and WORLD tables are detected;
 2. `.pvplife status` works;
 3. force-start `StormwindDuel` / `OrgrimmarDuel`;
 4. verify bot-vs-bot duel requests;
 5. verify real-player challenge level check and cooldown;
-6. normal hotspots;
+6. test normal hotspots;
 7. force-start `ForTheHorde_Stormwind` and `ForTheAlliance_Orgrimmar`;
 8. tune rally/target coordinates and bot counts from actual server behaviour.
 
 ## Status
 
-`v1.0-` — initial PvP Life implementation for compile/live 
+Active — working PvP Life implementation with configurable world PvP and persistent duel zones.

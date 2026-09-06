@@ -1,5 +1,19 @@
 # Changelog
 
+## Current
+
+- Added per-zone configuration switches while keeping GM force-start available for testing.
+- Added partial-team fallback and clearer selection diagnostics for smaller bot populations.
+- Updated the Stormwind and Orgrimmar duel-zone seed locations.
+- Reserved duel participants from random teleportation and anchored idle bots near their assigned duel positions.
+- Added AzerothCore Playerbot and `mod-playerbots` dependency metadata and links.
+
+## v0.1.1-test
+
+- Fixed compatibility with the current mod-playerbots `ActivityType` enum by fully qualifying PvP Life activity values.
+- Updated real-player checks for the current Playerbots API (`IsRealPlayer(Player*)` and `HasGameClientMaster()`).
+- Added explicit game-time conversion to avoid MSVC narrowing errors in queued chat events.
+
 ## v0.1.0-test
 
 - Initial PvP Life module.

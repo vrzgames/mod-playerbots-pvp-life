@@ -1,8 +1,9 @@
 {
   "name": "mod-playerbots-pvp-life",
   "displayName": "PvP Life",
-  "version": "0.1.0-test",
   "description": "Dynamic World PvP, duel zones and faction activity for AzerothCore Playerbots.",
   "author": "iCore",
-  "license": "GPL-2.0-or-later"
+  "license": "GPL-2.0-or-later",
+  "target_core": "mod-playerbots/azerothcore-wotlk Playerbot branch",
+  "target_module": "mod-playerbots master"
 }
