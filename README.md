@@ -6,9 +6,7 @@ Created by **iCore**.
 
 An AzerothCore + mod-playerbots module focused on making the open world feel active through persistent, configurable bot PvP rather than isolated scripted battles.
 
-## First test build
-
-This is the first test implementation. It is intentionally split into independent systems so each part can be enabled, tuned, or disabled without affecting the others.
+ It is intentionally split into independent systems so each part can be enabled, tuned, or disabled without affecting the others.
 
 ### Included systems
 
@@ -163,19 +161,16 @@ The duel system is meant to look like a populated PvP-server duel area, not a du
 
 These are deliberately part of the normal world-PvP framework, with faction-specific attackers and defenders rather than a separate minigame. Server announcements are off by default; optional defender yell/world-chat messages provide the visible clue that something is happening.
 
-## Test priorities
-
-For the first live-server test, verify in this order:
 
 1. module loads and WORLD tables are detected;
 2. `.pvplife status` works;
 3. force-start `StormwindDuel` / `OrgrimmarDuel`;
 4. verify bot-vs-bot duel requests;
 5. verify real-player challenge level check and cooldown;
-6. test normal hotspots;
+6. normal hotspots;
 7. force-start `ForTheHorde_Stormwind` and `ForTheAlliance_Orgrimmar`;
 8. tune rally/target coordinates and bot counts from actual server behaviour.
 
 ## Status
 
-`v0.1.0-test` — initial PvP Life implementation for compile/live testing.
+`v1.0-` — initial PvP Life implementation for compile/live 
