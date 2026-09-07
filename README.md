@@ -211,9 +211,9 @@ These are deliberately part of the normal world-PvP framework, with faction-spec
 
 ### City Life compatibility
 
-PvP Life publishes and respects the shared Playerbots event marker `life_module_reservation`.
-Current versions of `mod-playerbots-city-life` use the same marker, so the two modules never select
-the same random bot. No compatibility patch or terminal command is required.
+When a current version of `mod-playerbots-city-life` is installed, PvP Life automatically uses its
+shared in-memory bot reservation registry, so the two modules never select the same bot. The
+integration uses only public module code; no compatibility patch or terminal command is required.
 
 ## Test priorities
 
