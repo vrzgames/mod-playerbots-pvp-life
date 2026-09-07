@@ -6,6 +6,11 @@
 
 #include "PvPLifeMgr.h"
 
+#if __has_include("../../mod-playerbots-city-life/src/LifeBotReservation.h")
+#include "../../mod-playerbots-city-life/src/LifeBotReservation.h"
+#define PVP_LIFE_HAS_SHARED_RESERVATIONS
+#endif
+
 #include "Chat.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
@@ -37,6 +42,37 @@
 
 namespace
 {
+#ifdef PVP_LIFE_HAS_SHARED_RESERVATIONS
+    bool IsLifeBotReserved(uint32 guidLow)
+    {
+        return PlayerbotsLife::IsReserved(guidLow);
+    }
+
+    bool TryReserveLifeBot(uint32 guidLow)
+    {
+        return PlayerbotsLife::TryReserve(guidLow, PlayerbotsLife::ReservationOwner::PvPLife);
+    }
+
+    void ReleaseLifeBot(uint32 guidLow)
+    {
+        PlayerbotsLife::Release(guidLow, PlayerbotsLife::ReservationOwner::PvPLife);
+    }
+#else
+    bool IsLifeBotReserved(uint32 /*guidLow*/)
+    {
+        return false;
+    }
+
+    bool TryReserveLifeBot(uint32 /*guidLow*/)
+    {
+        return true;
+    }
+
+    void ReleaseLifeBot(uint32 /*guidLow*/)
+    {
+    }
+#endif
+
     std::string Lower(std::string value)
     {
         std::transform(value.begin(), value.end(), value.begin(),
@@ -435,8 +471,7 @@ namespace PvPLife
         if (!sRandomPlayerbotMgr.IsRandomBot(player) &&
             !const_cast<Manager*>(this)->IsConfiguredBotAccount(player->GetSession()->GetAccountId()))
             return false;
-        if (sRandomPlayerbotMgr.IsRandomBot(player) &&
-            sRandomPlayerbotMgr.GetEventValue(player->GetGUID().GetCounter(), "life_module_reservation"))
+        if (IsLifeBotReserved(player->GetGUID().GetCounter()))
             return false;
         PlayerbotAI* ai = GET_PLAYERBOT_AI(player);
         if (!ai || ::IsRealPlayer(player) || ai->HasGameClientMaster())
@@ -696,11 +731,8 @@ namespace PvPLife
             Player* player = FindPlayer(bot.GuidLow);
             if (!IsSafeBot(player))
                 return;
-            if (sRandomPlayerbotMgr.IsRandomBot(player))
-            {
-                sRandomPlayerbotMgr.SetEventValue(bot.GuidLow, "life_module_reservation", 1,
-                    event.EndsAt - now + 60, "pvplife");
-            }
+            if (!TryReserveLifeBot(bot.GuidLow))
+                return;
 
             Participant part;
             part.Bot = bot;
@@ -810,6 +842,7 @@ namespace PvPLife
         LOG_INFO("module", "[PvPLife] END #{} {} reason={}", event.EventId, event.EventZone.Name, reason);
         for (Participant const& part : event.Members)
         {
+            ReleaseLifeBot(part.Bot.GuidLow);
             Player* p = FindPlayer(part.Bot.GuidLow);
             if (!p || !p->GetSession() || p->IsBeingTeleported())
                 continue;
@@ -824,10 +857,7 @@ namespace PvPLife
                 ai->ResetStrategies();
             }
             if (sRandomPlayerbotMgr.IsRandomBot(p))
-            {
-                sRandomPlayerbotMgr.SetEventValue(part.Bot.GuidLow, "life_module_reservation", 0, 0);
                 sRandomPlayerbotMgr.ScheduleTeleport(part.Bot.GuidLow);
-            }
             if (_returnBots)
                 p->TeleportTo(part.OriginalMap, part.OriginalX, part.OriginalY, part.OriginalZ, part.OriginalO);
         }
