@@ -64,7 +64,8 @@ PvPLife.Movement.MoveAfterArrivalMinSeconds = 6
 PvPLife.Movement.MoveAfterArrivalMaxSeconds = 20
 
 # Hard safety cap per faction/side for one activity.
-PvPLife.Bots.MaxPerSide = 30
+# This does not create more bots by itself; it only caps the per-zone population settings below.
+PvPLife.Bots.MaxPerSide = 100
 
 ###################################################################################################
 # Persistent world PvP
@@ -81,25 +82,57 @@ PvPLife.World.MaxActiveHotspots = 3
 PvPLife.World.RandomStartChance = 35
 
 ###################################################################################################
-# Per-zone switches
+# Per-zone population
 ###################################################################################################
 
 # A zone must be enabled both here and in the pvp_life_zone database table to start automatically.
 # 1 = enabled, 0 = disabled. A GM can still force a disabled zone with .pvplife start <name>.
+# MinPopulation and MaxPopulation are the TOTAL number of bots at the hotspot, both sides combined.
+# The module randomly chooses a total inside this range and splits it between attackers and defenders
+# using the side ratio stored in the pvp_life_zone database table.
+# Values are capped at two times PvPLife.Bots.MaxPerSide.
 PvPLife.Zone.StormwindDuel.Enable = 1
+PvPLife.Zone.StormwindDuel.MinPopulation = 8
+PvPLife.Zone.StormwindDuel.MaxPopulation = 16
 PvPLife.Zone.OrgrimmarDuel.Enable = 1
+PvPLife.Zone.OrgrimmarDuel.MinPopulation = 8
+PvPLife.Zone.OrgrimmarDuel.MaxPopulation = 16
 PvPLife.Zone.STV_Nesingwary.Enable = 1
+PvPLife.Zone.STV_Nesingwary.MinPopulation = 10
+PvPLife.Zone.STV_Nesingwary.MaxPopulation = 20
 PvPLife.Zone.STV_Gurubashi.Enable = 1
+PvPLife.Zone.STV_Gurubashi.MinPopulation = 12
+PvPLife.Zone.STV_Gurubashi.MaxPopulation = 24
 PvPLife.Zone.Tanaris_Gadgetzan.Enable = 1
+PvPLife.Zone.Tanaris_Gadgetzan.MinPopulation = 10
+PvPLife.Zone.Tanaris_Gadgetzan.MaxPopulation = 20
 PvPLife.Zone.DarkPortal_Azeroth.Enable = 1
+PvPLife.Zone.DarkPortal_Azeroth.MinPopulation = 12
+PvPLife.Zone.DarkPortal_Azeroth.MaxPopulation = 28
 PvPLife.Zone.DarkPortal_Outland.Enable = 1
+PvPLife.Zone.DarkPortal_Outland.MinPopulation = 12
+PvPLife.Zone.DarkPortal_Outland.MaxPopulation = 28
 PvPLife.Zone.Shattrath_Outskirts.Enable = 1
+PvPLife.Zone.Shattrath_Outskirts.MinPopulation = 10
+PvPLife.Zone.Shattrath_Outskirts.MaxPopulation = 24
 PvPLife.Zone.K3_StormPeaks.Enable = 1
+PvPLife.Zone.K3_StormPeaks.MinPopulation = 10
+PvPLife.Zone.K3_StormPeaks.MaxPopulation = 24
 PvPLife.Zone.Goldshire_Roaming.Enable = 1
+PvPLife.Zone.Goldshire_Roaming.MinPopulation = 4
+PvPLife.Zone.Goldshire_Roaming.MaxPopulation = 10
 PvPLife.Zone.Durotar_Roaming.Enable = 1
+PvPLife.Zone.Durotar_Roaming.MinPopulation = 4
+PvPLife.Zone.Durotar_Roaming.MaxPopulation = 10
 PvPLife.Zone.Orgrimmar_Zeppelin.Enable = 0
+PvPLife.Zone.Orgrimmar_Zeppelin.MinPopulation = 4
+PvPLife.Zone.Orgrimmar_Zeppelin.MaxPopulation = 12
 PvPLife.Zone.ForTheHorde_Stormwind.Enable = 1
+PvPLife.Zone.ForTheHorde_Stormwind.MinPopulation = 12
+PvPLife.Zone.ForTheHorde_Stormwind.MaxPopulation = 28
 PvPLife.Zone.ForTheAlliance_Orgrimmar.Enable = 1
+PvPLife.Zone.ForTheAlliance_Orgrimmar.MinPopulation = 12
+PvPLife.Zone.ForTheAlliance_Orgrimmar.MaxPopulation = 28
 
 ###################################################################################################
 # Duel zones
