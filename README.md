@@ -19,6 +19,7 @@ It is intentionally split into independent systems so each part can be enabled, 
 - **Optional announcements**: server-wide scripted announcements exist for debugging/information but are disabled by default.
 - **Randomisation**: bot counts, duration, arrival timing, movement and position jitter are varied to reduce scripted-looking behaviour.
 - **Activity protection**: bots in combat, battlegrounds, instances, flight, duels, or (by default) groups are rejected.
+- **Life-module coordination**: shared bot reservations prevent conflicts with `mod-playerbots-city-life`.
 - **Small-population fallback**: activities can start with smaller teams instead of silently failing when the full random bot count is unavailable.
 - **Permanent capital duel zones**: available random bots are kept near the configured Stormwind and Orgrimmar duel points, automatically paired, healed and re-paired after duels.
 - **Return handling**: participants can be sent back to their previous location when their activity ends.
@@ -63,9 +64,17 @@ PvPLife.World.MaxActiveHotspots = 3
 
 # Individual zone switches (1 = automatic activity enabled, 0 = disabled)
 PvPLife.Zone.STV_Nesingwary.Enable = 1
+PvPLife.Zone.STV_Nesingwary.MinPopulation = 10
+PvPLife.Zone.STV_Nesingwary.MaxPopulation = 20
 PvPLife.Zone.STV_Gurubashi.Enable = 1
+PvPLife.Zone.STV_Gurubashi.MinPopulation = 12
+PvPLife.Zone.STV_Gurubashi.MaxPopulation = 24
 PvPLife.Zone.DarkPortal_Azeroth.Enable = 1
+PvPLife.Zone.DarkPortal_Azeroth.MinPopulation = 12
+PvPLife.Zone.DarkPortal_Azeroth.MaxPopulation = 28
 PvPLife.Zone.Shattrath_Outskirts.Enable = 1
+PvPLife.Zone.Shattrath_Outskirts.MinPopulation = 10
+PvPLife.Zone.Shattrath_Outskirts.MaxPopulation = 24
 
 PvPLife.Duel.Enable = 1
 PvPLife.Duel.AlwaysActive = 1
@@ -83,6 +92,7 @@ PvPLife.BotChat.Enable = 1
 PvPLife.Bots.RespectPlayerbotActivity = 0
 PvPLife.Bots.AllowPartialTeams = 1
 PvPLife.Bots.MinimumPerSide = 1
+PvPLife.Bots.MaxPerSide = 100
 ```
 
 ### Level check example
@@ -103,10 +113,24 @@ movement is left untouched. `GuardIntervalMs` controls how frequently the waitin
 
 `pvp_life_zone` stores the locations and behaviour of each activity.
 
-Every database zone can also be controlled from the config with
-`PvPLife.Zone.<zone name>.Enable`. The database `enabled` field and the config switch must both
-be enabled for automatic activity. A manual `.pvplife start <name>` command can still force-start
-a disabled zone for testing.
+Every database zone can also be controlled from the config with:
+
+```ini
+PvPLife.Zone.<zone name>.Enable = 1
+PvPLife.Zone.<zone name>.MinPopulation = 10
+PvPLife.Zone.<zone name>.MaxPopulation = 60
+```
+
+`MinPopulation` and `MaxPopulation` are the total bot population of the hotspot, with both sides
+combined. For every activity the module randomly chooses a total inside this range, then divides it
+between attackers and defenders using the side ratio stored in the database. The database counts are
+also used as backward-compatible defaults when the population keys are omitted. The configured total
+is capped at two times `PvPLife.Bots.MaxPerSide`.
+
+The database `enabled` field and the config switch must both be enabled for automatic activity. A
+manual `.pvplife start <name>` command can still force-start a disabled zone for testing. New custom
+database zones use the same key pattern after a config reload. Reloading the config changes newly
+started activities; an activity already in progress keeps its current participants until it ends.
 
 Activity types:
 
@@ -184,6 +208,12 @@ The duel system is meant to look like a populated PvP-server duel area, not a du
 ### For the Horde / For the Alliance
 
 These are deliberately part of the normal world-PvP framework, with faction-specific attackers and defenders rather than a separate minigame. Server announcements are off by default; optional defender yell/world-chat messages provide the visible clue that something is happening.
+
+### City Life compatibility
+
+PvP Life publishes and respects the shared Playerbots event marker `life_module_reservation`.
+Current versions of `mod-playerbots-city-life` use the same marker, so the two modules never select
+the same random bot. No compatibility patch or terminal command is required.
 
 ## Test priorities
 

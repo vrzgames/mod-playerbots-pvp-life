@@ -2,6 +2,8 @@
 
 ## Current
 
+- Added native shared bot reservation support for conflict-free City Life compatibility.
+- Added configurable total minimum and maximum bot population for every hotspot.
 - Added per-zone configuration switches while keeping GM force-start available for testing.
 - Added partial-team fallback and clearer selection diagnostics for smaller bot populations.
 - Updated the Stormwind and Orgrimmar duel-zone seed locations.
