@@ -162,7 +162,8 @@ namespace PvPLife
         _arrivalStaggerMax = sConfigMgr->GetOption<uint32>("PvPLife.Movement.ArrivalStaggerMaxSeconds", 12);
         _moveAfterArrivalMin = sConfigMgr->GetOption<uint32>("PvPLife.Movement.MoveAfterArrivalMinSeconds", 6);
         _moveAfterArrivalMax = sConfigMgr->GetOption<uint32>("PvPLife.Movement.MoveAfterArrivalMaxSeconds", 20);
-        _maxBotsPerSide = std::clamp<uint32>(sConfigMgr->GetOption<uint32>("PvPLife.Bots.MaxPerSide", 30), 1, 40);
+        _maxBotsPerSide = std::clamp<uint32>(sConfigMgr->GetOption<uint32>("PvPLife.Bots.MaxPerSide", 100), 1, 200);
+        _minimumBotsPerSide = std::min(_minimumBotsPerSide, _maxBotsPerSide);
 
         _alwaysActiveWorldPvp = sConfigMgr->GetOption<bool>("PvPLife.World.AlwaysActive", true);
         _minActiveSkirmishes = sConfigMgr->GetOption<uint32>("PvPLife.World.MinActiveHotspots", 1);
@@ -214,6 +215,7 @@ namespace PvPLife
 
         ImportPlayerbotDefaults();
         _botAccountCache.clear();
+        _zoneConfig.clear();
         _startupElapsedMs = 0;
         _timerMs = 0;
         _duelGuardTimerMs = 0;
@@ -221,6 +223,8 @@ namespace PvPLife
         _databaseReady = VerifyDatabase();
         if (_enable && !_databaseReady)
             _enable = false;
+        if (_databaseReady)
+            LoadZoneConfig();
 
         LOG_INFO("module", "[PvPLife] enable={} database={} alwaysWorld={} duel={} FTH={} FTA={} botChat={} "
             "announce={} prefix='{}' respectActivity={} partialTeams={} minimumPerSide={}",
@@ -282,11 +286,49 @@ namespace PvPLife
         z.TargetX = f[13].Get<float>(); z.TargetY = f[14].Get<float>(); z.TargetZ = f[15].Get<float>(); z.TargetO = f[16].Get<float>();
         z.AttackersMin = f[17].Get<uint32>(); z.AttackersMax = f[18].Get<uint32>();
         z.DefendersMin = f[19].Get<uint32>(); z.DefendersMax = f[20].Get<uint32>();
+        z.PopulationMin = z.AttackersMin + z.DefendersMin;
+        z.PopulationMax = z.AttackersMax + z.DefendersMax;
         z.DurationMin = f[21].Get<uint32>(); z.DurationMax = f[22].Get<uint32>();
         z.Weight = f[23].Get<uint32>(); z.CooldownSeconds = f[24].Get<uint32>(); z.LastStart = f[25].Get<uint32>();
         z.ChallengePlayers = f[26].Get<uint8>() != 0;
         z.BotChat = f[27].Get<uint8>() != 0;
         return z;
+    }
+
+    void Manager::LoadZoneConfig()
+    {
+        QueryResult result = WorldDatabase.Query(ZoneSelectSql("ORDER BY id").c_str());
+        if (!result)
+            return;
+
+        uint32 minimumPopulation = _minimumBotsPerSide * 2;
+        uint32 maximumPopulation = _maxBotsPerSide * 2;
+        do
+        {
+            Zone zone = ReadZone(result->Fetch());
+            std::string prefix = "PvPLife.Zone." + zone.Name;
+
+            ZoneConfig config;
+            config.Enabled = sConfigMgr->GetOption<bool>(prefix + ".Enable", true, false);
+            config.MinPopulation = std::clamp<uint32>(
+                sConfigMgr->GetOption<uint32>(prefix + ".MinPopulation", zone.PopulationMin, false),
+                minimumPopulation, maximumPopulation);
+            config.MaxPopulation = std::clamp<uint32>(
+                sConfigMgr->GetOption<uint32>(prefix + ".MaxPopulation", zone.PopulationMax, false),
+                config.MinPopulation, maximumPopulation);
+            _zoneConfig.emplace(zone.Name, config);
+        } while (result->NextRow());
+    }
+
+    void Manager::ApplyZoneConfig(Zone& zone) const
+    {
+        auto itr = _zoneConfig.find(zone.Name);
+        if (itr == _zoneConfig.end())
+            return;
+
+        zone.Enabled = zone.Enabled && itr->second.Enabled;
+        zone.PopulationMin = itr->second.MinPopulation;
+        zone.PopulationMax = itr->second.MaxPopulation;
     }
 
     std::vector<Zone> Manager::LoadZones(bool readyOnly, int typeFilter)
@@ -307,16 +349,11 @@ namespace PvPLife
         do
         {
             Zone z = ReadZone(result->Fetch());
-            if (z.Weight > 0 && IsZoneEnabledByConfig(z.Name))
+            ApplyZoneConfig(z);
+            if (z.Weight > 0 && z.Enabled)
                 zones.push_back(z);
         } while (result->NextRow());
         return zones;
-    }
-
-    bool Manager::IsZoneEnabledByConfig(std::string const& name) const
-    {
-        // Custom database zones remain enabled by default without generating a missing-config warning every tick.
-        return sConfigMgr->GetOption<bool>("PvPLife.Zone." + name + ".Enable", true, false);
     }
 
     bool Manager::LoadZoneByName(std::string name, Zone& out)
@@ -326,6 +363,7 @@ namespace PvPLife
         if (!result)
             return false;
         out = ReadZone(result->Fetch());
+        ApplyZoneConfig(out);
         return true;
     }
 
@@ -396,6 +434,9 @@ namespace PvPLife
             return false;
         if (!sRandomPlayerbotMgr.IsRandomBot(player) &&
             !const_cast<Manager*>(this)->IsConfiguredBotAccount(player->GetSession()->GetAccountId()))
+            return false;
+        if (sRandomPlayerbotMgr.IsRandomBot(player) &&
+            sRandomPlayerbotMgr.GetEventValue(player->GetGUID().GetCounter(), "life_module_reservation"))
             return false;
         PlayerbotAI* ai = GET_PLAYERBOT_AI(player);
         if (!ai || ::IsRealPlayer(player) || ai->HasGameClientMaster())
@@ -478,13 +519,36 @@ namespace PvPLife
         return static_cast<float>(irand(-static_cast<int32>(_positionJitter), static_cast<int32>(_positionJitter)));
     }
 
-    uint32 Manager::RandomCount(uint32 minCount, uint32 maxCount) const
+    void Manager::CalculatePopulation(Zone const& zone, uint32& attackerCount, uint32& defenderCount) const
     {
-        minCount = std::min(minCount, _maxBotsPerSide);
-        maxCount = std::min(maxCount, _maxBotsPerSide);
-        if (maxCount < minCount)
-            maxCount = minCount;
-        return urand(minCount, maxCount);
+        uint32 minimumPopulation = std::clamp<uint32>(zone.PopulationMin, 2, _maxBotsPerSide * 2);
+        uint32 maximumPopulation = std::clamp(zone.PopulationMax, minimumPopulation, _maxBotsPerSide * 2);
+        uint32 totalPopulation = urand(minimumPopulation, maximumPopulation);
+
+        uint64 attackerWeight = static_cast<uint64>(zone.AttackersMin) + zone.AttackersMax;
+        uint64 defenderWeight = static_cast<uint64>(zone.DefendersMin) + zone.DefendersMax;
+        uint64 totalWeight = attackerWeight + defenderWeight;
+        if (!totalWeight)
+        {
+            attackerWeight = 1;
+            totalWeight = 2;
+        }
+
+        attackerCount = static_cast<uint32>(
+            (static_cast<uint64>(totalPopulation) * attackerWeight + totalWeight / 2) / totalWeight);
+        attackerCount = std::clamp<uint32>(attackerCount, 1, totalPopulation - 1);
+        defenderCount = totalPopulation - attackerCount;
+
+        if (attackerCount > _maxBotsPerSide)
+        {
+            attackerCount = _maxBotsPerSide;
+            defenderCount = totalPopulation - attackerCount;
+        }
+        if (defenderCount > _maxBotsPerSide)
+        {
+            defenderCount = _maxBotsPerSide;
+            attackerCount = totalPopulation - defenderCount;
+        }
     }
 
     void Manager::ApplyPvpStrategies(Player* player, bool duelMode) const
@@ -556,8 +620,9 @@ namespace PvPLife
             for (Participant const& p : e.Members)
                 excluded.insert(p.Bot.GuidLow);
 
-        uint32 attackerNeed = RandomCount(zone.AttackersMin, zone.AttackersMax);
-        uint32 defenderNeed = RandomCount(zone.DefendersMin, zone.DefendersMax);
+        uint32 attackerNeed = 0;
+        uint32 defenderNeed = 0;
+        CalculatePopulation(zone, attackerNeed, defenderNeed);
         std::vector<BotCandidate> attackerPool =
             LoadCandidates(zone.AttackerTeam, zone.MinLevel, zone.MaxLevel, excluded);
         std::vector<BotCandidate> defenderPool =
@@ -631,6 +696,11 @@ namespace PvPLife
             Player* player = FindPlayer(bot.GuidLow);
             if (!IsSafeBot(player))
                 return;
+            if (sRandomPlayerbotMgr.IsRandomBot(player))
+            {
+                sRandomPlayerbotMgr.SetEventValue(bot.GuidLow, "life_module_reservation", 1,
+                    event.EndsAt - now + 60, "pvplife");
+            }
 
             Participant part;
             part.Bot = bot;
@@ -754,7 +824,10 @@ namespace PvPLife
                 ai->ResetStrategies();
             }
             if (sRandomPlayerbotMgr.IsRandomBot(p))
+            {
+                sRandomPlayerbotMgr.SetEventValue(part.Bot.GuidLow, "life_module_reservation", 0, 0);
                 sRandomPlayerbotMgr.ScheduleTeleport(part.Bot.GuidLow);
+            }
             if (_returnBots)
                 p->TeleportTo(part.OriginalMap, part.OriginalX, part.OriginalY, part.OriginalZ, part.OriginalO);
         }
@@ -1433,9 +1506,11 @@ namespace PvPLife
             do
             {
                 Zone z = ReadZone(result->Fetch());
-                handler->PSendSysMessage("#{} {} [{}] en={} {}->{} lvl={}-{} bots={}-{} / {}-{} cd={} challenge={} chat={}",
+                ApplyZoneConfig(z);
+                handler->PSendSysMessage("#{} {} [{}] en={} {}->{} lvl={}-{} population={}-{} ratio={}-{} / {}-{} cd={} challenge={} chat={}",
                     z.Id, z.Name, TypeName(z.Type), z.Enabled ? 1 : 0, TeamName(z.AttackerTeam), TeamName(z.DefenderTeam),
-                    z.MinLevel, z.MaxLevel, z.AttackersMin, z.AttackersMax, z.DefendersMin, z.DefendersMax,
+                    z.MinLevel, z.MaxLevel, z.PopulationMin, z.PopulationMax,
+                    z.AttackersMin, z.AttackersMax, z.DefendersMin, z.DefendersMax,
                     z.CooldownSeconds, z.ChallengePlayers ? 1 : 0, z.BotChat ? 1 : 0);
             } while (result->NextRow());
             return true;

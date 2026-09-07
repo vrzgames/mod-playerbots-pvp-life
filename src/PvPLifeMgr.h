@@ -36,7 +36,8 @@ namespace PvPLife
 
         std::vector<Zone> LoadZones(bool readyOnly = false, int typeFilter = -1);
         bool LoadZoneByName(std::string name, Zone& out);
-        bool IsZoneEnabledByConfig(std::string const& name) const;
+        void LoadZoneConfig();
+        void ApplyZoneConfig(Zone& zone) const;
         Zone ReadZone(Field* fields);
         std::string ZoneSelectSql(std::string const& suffix = "") const;
 
@@ -72,7 +73,7 @@ namespace PvPLife
         void ApplyPvpStrategies(Player* player, bool duelMode) const;
         void MoveBot(Player* player, uint32 mapId, float x, float y, float z, float o, bool teleport) const;
         float Jitter() const;
-        uint32 RandomCount(uint32 minCount, uint32 maxCount) const;
+        void CalculatePopulation(Zone const& zone, uint32& attackerCount, uint32& defenderCount) const;
 
         std::string RandomChatLine(ActivityType type, ChatChannel channel, TeamSide speakerTeam);
         void Announce(std::string const& text) const;
@@ -105,7 +106,7 @@ namespace PvPLife
         uint32 _arrivalStaggerMax = 12;
         uint32 _moveAfterArrivalMin = 6;
         uint32 _moveAfterArrivalMax = 20;
-        uint32 _maxBotsPerSide = 30;
+        uint32 _maxBotsPerSide = 100;
 
         bool _alwaysActiveWorldPvp = true;
         uint32 _minActiveSkirmishes = 1;
@@ -153,6 +154,15 @@ namespace PvPLife
         std::unordered_map<uint32, uint32> _botChallengeCooldown;
         std::unordered_map<uint32, uint32> _botDuelCooldown;
         std::unordered_map<uint32, bool> _botAccountCache;
+
+        struct ZoneConfig
+        {
+            bool Enabled = true;
+            uint32 MinPopulation = 2;
+            uint32 MaxPopulation = 2;
+        };
+
+        std::unordered_map<std::string, ZoneConfig> _zoneConfig;
     };
 }
 

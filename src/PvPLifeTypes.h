@@ -57,6 +57,8 @@ namespace PvPLife
         uint32 AttackersMax = 8;
         uint32 DefendersMin = 3;
         uint32 DefendersMax = 8;
+        uint32 PopulationMin = 6;
+        uint32 PopulationMax = 16;
         uint32 DurationMin = 10;
         uint32 DurationMax = 25;
         uint32 Weight = 100;
