@@ -75,6 +75,9 @@ PvPLife.Zone.DarkPortal_Azeroth.MaxPopulation = 28
 PvPLife.Zone.Shattrath_Outskirts.Enable = 1
 PvPLife.Zone.Shattrath_Outskirts.MinPopulation = 10
 PvPLife.Zone.Shattrath_Outskirts.MaxPopulation = 24
+PvPLife.Zone.Wintergrasp.Enable = 1
+PvPLife.Zone.Wintergrasp.MinPopulation = 10
+PvPLife.Zone.Wintergrasp.MaxPopulation = 24
 
 PvPLife.Duel.Enable = 1
 PvPLife.Duel.AlwaysActive = 1
@@ -149,13 +152,14 @@ The SQL includes starter locations for:
 
 - Stormwind duel area
 - Orgrimmar duel area
-- Stranglethorn / Nesingwary
+- Stranglethorn / Nesingwary (using the custom `stvpvp` teleport)
 - Gurubashi Arena
 - Gadgetzan / Tanaris
 - Dark Portal (Azeroth)
 - Dark Portal (Outland)
-- Shattrath outskirts
-- K3 / Storm Peaks
+- Shattrath outskirts (using the custom `shattrathpvp` teleport)
+- K3 / Storm Peaks (using the custom `k3pvp` teleport)
+- Wintergrasp (using the custom `wintergrasppvp` teleport)
 - Horde roaming near Goldshire
 - Alliance roaming near Durotar
 - optional Orgrimmar zeppelin hotspot (disabled until tuned)
@@ -224,7 +228,7 @@ For the first live-server test, verify in this order:
 3. force-start `StormwindDuel` / `OrgrimmarDuel`;
 4. verify bot-vs-bot duel requests;
 5. verify real-player challenge level check and cooldown;
-6. test normal hotspots;
+6. test normal hotspots, including the new `Wintergrasp` zone;
 7. force-start `ForTheHorde_Stormwind` and `ForTheAlliance_Orgrimmar`;
 8. tune rally/target coordinates and bot counts from actual server behaviour.
 

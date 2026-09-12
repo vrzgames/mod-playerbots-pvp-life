@@ -2,6 +2,9 @@
 
 ## Current
 
+- Updated the K3, STV/Nesingwary, and Shattrath outskirts seed coordinates from
+  the server's `k3pvp`, `stvpvp`, and `shattrathpvp` teleport points.
+- Added a Wintergrasp PvP hotspot using the saved `wintergrasppvp` teleport coordinates.
 - Added shared in-memory bot reservations for conflict-free City Life compatibility without private
   Playerbots API calls.
 - Added configurable total minimum and maximum bot population for every hotspot.
