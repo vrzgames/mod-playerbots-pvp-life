@@ -52,7 +52,7 @@ DELETE FROM `pvp_life_zone` WHERE `name` IN (
   'StormwindDuel','OrgrimmarDuel','STV_Nesingwary','STV_Gurubashi','Tanaris_Gadgetzan',
   'DarkPortal_Azeroth','DarkPortal_Outland','Shattrath_Outskirts','K3_StormPeaks',
   'Goldshire_Roaming','Durotar_Roaming','Orgrimmar_Zeppelin',
-  'ForTheHorde_Stormwind','ForTheAlliance_Orgrimmar'
+  'ForTheHorde_Stormwind','ForTheAlliance_Orgrimmar','Wintergrasp'
 );
 
 INSERT INTO `pvp_life_zone`
@@ -65,14 +65,15 @@ VALUES
 ('StormwindDuel',1,1,0,0,1,80,0, -9122.49,350.862,93.7893,4.19046, -9122.49,350.862,93.7893,4.19046, 4,8,4,8,20,40,220,30,0,1,0), -- allyduelzone
 ('OrgrimmarDuel',1,1,1,1,1,80,1, 1282.04,-4395.88,26.3002,3.63561, 1282.04,-4395.88,26.3002,3.63561, 4,8,4,8,20,40,220,30,0,1,0), -- hordeduelzone
 
--- Normal world-PvP hotspots.
-('STV_Nesingwary',1,0,1,0,25,50,0, -11670.0,-50.0,5.0,0.0, -11620.0,-70.0,10.0,0.0, 5,10,5,10,12,25,120,600,0,0,0),
+-- Normal world-PvP hotspots. The marked rows use the server's custom game_tele points.
+('STV_Nesingwary',1,0,1,0,25,50,0, -11490.5,-302.536,35.7362,3.57, -11490.5,-302.536,35.7362,3.57, 5,10,5,10,12,25,120,600,0,0,0), -- stvpvp
 ('STV_Gurubashi',1,0,0,1,30,55,0, -13290.0,-274.0,20.0,0.0, -13245.0,-266.0,21.0,0.0, 6,12,6,12,12,25,130,600,0,0,0),
 ('Tanaris_Gadgetzan',1,0,1,0,40,65,1, -7200.0,-3860.0,9.0,0.0, -7165.0,-3805.0,9.0,0.0, 5,10,5,10,12,25,110,720,0,0,0),
 ('DarkPortal_Azeroth',1,0,0,1,55,80,0, -11820.0,-3200.0,-30.0,0.0, -11905.0,-3204.0,-14.0,0.0, 6,14,6,14,15,30,135,900,0,0,0),
 ('DarkPortal_Outland',1,0,1,0,58,80,530, -320.0,930.0,84.0,0.0, -248.0,922.0,84.0,0.0, 6,14,6,14,15,30,135,900,0,0,0),
-('Shattrath_Outskirts',1,0,0,1,60,80,530, -1900.0,5400.0,-12.0,0.0, -1840.0,5415.0,-12.0,0.0, 5,12,5,12,12,25,100,900,0,0,0),
-('K3_StormPeaks',1,0,1,0,70,80,571, 6185.0,-1080.0,403.0,0.0, 6135.0,-1074.0,403.0,0.0, 5,12,5,12,12,25,105,900,0,0,0),
+('Shattrath_Outskirts',1,0,0,1,60,80,530, -1878.6,4927.39,-10.3383,4.33574, -1878.6,4927.39,-10.3383,4.33574, 5,12,5,12,12,25,100,900,0,0,0), -- shattrathpvp
+('K3_StormPeaks',1,0,1,0,70,80,571, 6197.19,-1001.47,408.121,4.65582, 6197.19,-1001.47,408.121,4.65582, 5,12,5,12,12,25,105,900,0,0,0), -- k3pvp
+('Wintergrasp',1,0,1,0,70,80,571, 4700.1,2867.58,387.683,3.3566, 4700.1,2867.58,387.683,3.3566, 5,12,5,12,12,25,115,900,0,0,0), -- wintergrasppvp
 
 -- Cross-faction roaming near classic social/PvP areas.
 ('Goldshire_Roaming',1,0,1,0,5,30,0, -9520.0,55.0,58.0,0.0, -9465.0,64.0,56.0,0.0, 2,5,2,5,8,18,85,720,0,0,0),
